@@ -1,0 +1,791 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Documentation",
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/admin/users": {
+            "get": {
+                "summary": "Get all users (Admin only)",
+                "operationId": "5821d6b63acf6b806efe6cfd9e076608",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name or email",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "description": "Filter by role",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "mahasiswa",
+                                "tenaga_pendidik"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Users retrieved successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{id}/toggle-admin": {
+            "put": {
+                "summary": "Toggle admin status of a user",
+                "operationId": "d62ea1c85ea8fe6d7d0231c646a619cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User admin status updated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Cannot modify own admin status"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{id}": {
+            "put": {
+                "summary": "Update user information (Admin only)",
+                "operationId": "741c594a357d2b27c639b221d66ad330",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "mahasiswa",
+                                            "tenaga_pendidik"
+                                        ]
+                                    },
+                                    "programStudy": {
+                                        "type": "string"
+                                    },
+                                    "is_admin": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete a user (Admin only)",
+                "operationId": "44eee40ddd4c6892e817da79193968d2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Cannot delete own account"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/stats": {
+            "get": {
+                "summary": "Get admin dashboard statistics",
+                "operationId": "2aa44c635f42b25158921dce333b0073",
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/feedback": {
+            "get": {
+                "summary": "Get all feedback for admin management",
+                "operationId": "cfd4f32bd6e1dace16df0d30f1e55752",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "rating",
+                        "in": "query",
+                        "description": "Filter by rating",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 5,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "has_reply",
+                        "in": "query",
+                        "description": "Filter by reply status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback retrieved successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/feedback/{id}/reply": {
+            "put": {
+                "summary": "Reply to feedback (Admin only)",
+                "operationId": "f08f045dc0618501ac0862c993acd858",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Feedback ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "balasan"
+                                ],
+                                "properties": {
+                                    "balasan": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reply sent successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Feedback not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/feedback/{id}": {
+            "delete": {
+                "summary": "Delete feedback (Admin only)",
+                "operationId": "2f1677d7ea5aea29e6954899d5cd61bc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Feedback ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback deleted successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin access required"
+                    },
+                    "404": {
+                        "description": "Feedback not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/login": {
+            "post": {
+                "summary": "User Login",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "summary": "User Registration",
+                "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "mahasiswa",
+                                            "tenaga_pendidik"
+                                        ]
+                                    },
+                                    "programStudy": {
+                                        "description": "Program study code",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "summary": "User Logout",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/profile": {
+            "get": {
+                "summary": "Get User Profile",
+                "operationId": "94a5f4c5f5e5755cf43698cf9bc49e9d",
+                "responses": {
+                    "200": {
+                        "description": "User profile retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/register-admin": {
+            "post": {
+                "summary": "Register First Admin (Only works if no admin exists)",
+                "operationId": "5000e05edaaa171b25ff8964c2aca24f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "mahasiswa",
+                                            "tenaga_pendidik"
+                                        ]
+                                    },
+                                    "programStudy": {
+                                        "description": "Program study code",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Admin created successfully"
+                    },
+                    "403": {
+                        "description": "Admin already exists"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/check-admin": {
+            "get": {
+                "summary": "Check if current user is admin",
+                "operationId": "1e3f040aeb9f42b83740eeb142b4ef85",
+                "responses": {
+                    "200": {
+                        "description": "Admin status checked"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/feedback": {
+            "get": {
+                "summary": "Get all feedback with pagination and filters",
+                "operationId": "dc2d3a20e7bf609f07d946e5c674fbb4",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "rating",
+                        "in": "query",
+                        "description": "Filter by rating (1-5)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 5,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "has_reply",
+                        "in": "query",
+                        "description": "Filter by reply status (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback retrieved successfully"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create new feedback",
+                "operationId": "00cc0cc44651586507dc21fec307d425",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rating",
+                                    "komentar"
+                                ],
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1
+                                    },
+                                    "komentar": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Feedback created successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/feedback/{id}": {
+            "get": {
+                "summary": "Get specific feedback by ID",
+                "operationId": "0d837fe2e9fd2f07905744d25c0f73cb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Feedback ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Feedback not found"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update user's own feedback",
+                "operationId": "45f45dc205a225c558d1e644f755f5c1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Feedback ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1
+                                    },
+                                    "komentar": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Feedback updated successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Can only edit own feedback"
+                    },
+                    "404": {
+                        "description": "Feedback not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete user's own feedback",
+                "operationId": "a067718a32f076a3daf710f3be3e1e44",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Feedback ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback deleted successfully"
+                    },
+                    "403": {
+                        "description": "Forbidden - Can only delete own feedback"
+                    },
+                    "404": {
+                        "description": "Feedback not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/feedback/my": {
+            "get": {
+                "summary": "Get current user's feedback",
+                "operationId": "066a689ca203b7eb1ea819db4921b69e",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User feedback retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/feedback/stats": {
+            "get": {
+                "summary": "Get feedback statistics",
+                "operationId": "5257c265a2a9daad175332d7ebbf3ad1",
+                "responses": {
+                    "200": {
+                        "description": "Statistics retrieved successfully"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    }
+}

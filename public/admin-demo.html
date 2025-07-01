@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .table th {
+            background-color: #f8f9fa;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard Demo</h1>
+    
+    <div id="loginSection" class="container">
+        <h2>Login as Admin</h2>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="loginEmail" placeholder="admin@example.com">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="loginPassword" placeholder="password">
+        </div>
+        <button class="btn" onclick="login()">Login</button>
+        <button class="btn btn-success" onclick="showRegisterAdmin()">Register First Admin</button>
+    </div>
+
+    <div id="registerAdminSection" class="container" style="display: none;">
+        <h2>Register First Admin</h2>
+        <div class="form-group">
+            <label>Name:</label>
+            <input type="text" id="adminName" placeholder="Admin Name">
+        </div>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="adminEmail" placeholder="admin@example.com">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="adminPassword" placeholder="password">
+        </div>
+        <div class="form-group">
+            <label>Role:</label>
+            <select id="adminRole">
+                <option value="tenaga_pendidik">Tenaga Pendidik</option>
+                <option value="mahasiswa">Mahasiswa</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Program Study:</label>
+            <input type="text" id="adminProgramStudy" placeholder="s1_informatika">
+        </div>
+        <button class="btn" onclick="registerAdmin()">Register Admin</button>
+        <button class="btn" onclick="hideRegisterAdmin()">Cancel</button>
+    </div>
+
+    <div id="dashboardSection" class="container" style="display: none;">
+        <h2>Admin Dashboard</h2>
+        
+        <div id="statsSection" class="stats-grid">
+            <!-- Stats will be populated here -->
+        </div>
+
+        <div class="container">
+            <h3>User Management</h3>
+            <div class="form-group">
+                <input type="text" id="searchInput" placeholder="Search users..." onkeyup="searchUsers()">
+            </div>
+            <div class="form-group">
+                <select id="roleFilter" onchange="filterUsers()">
+                    <option value="">All Roles</option>
+                    <option value="mahasiswa">Mahasiswa</option>
+                    <option value="tenaga_pendidik">Tenaga Pendidik</option>
+                </select>
+            </div>
+            <button class="btn" onclick="loadUsers()">Refresh Users</button>
+            
+            <table class="table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Program Study</th>
+                        <th>Admin</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Users will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="messageArea"></div>
+
+    <script>
+        const API_BASE = '/api';
+        let currentToken = localStorage.getItem('token');
+        let currentPage = 1;
+
+        // Check if already logged in
+        if (currentToken) {
+            checkAdminStatus();
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => messageArea.innerHTML = '', 5000);
+        }
+
+        function showRegisterAdmin() {
+            document.getElementById('registerAdminSection').style.display = 'block';
+        }
+
+        function hideRegisterAdmin() {
+            document.getElementById('registerAdminSection').style.display = 'none';
+        }
+
+        async function registerAdmin() {
+            const data = {
+                name: document.getElementById('adminName').value,
+                email: document.getElementById('adminEmail').value,
+                password: document.getElementById('adminPassword').value,
+                role: document.getElementById('adminRole').value,
+                programStudy: document.getElementById('adminProgramStudy').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/register-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('First admin registered successfully! Please login.', 'success');
+                    hideRegisterAdmin();
+                } else {
+                    showMessage(result.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentToken = result.token;
+                    localStorage.setItem('token', currentToken);
+                    checkAdminStatus();
+                } else {
+                    showMessage(result.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function checkAdminStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/check-admin`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.is_admin) {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('registerAdminSection').style.display = 'none';
+                    document.getElementById('dashboardSection').style.display = 'block';
+                    loadStats();
+                    loadUsers();
+                } else {
+                    showMessage('Access denied. Admin privileges required.', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const statsSection = document.getElementById('statsSection');
+                    statsSection.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-number">${result.stats.total_users}</div>
+                            <div>Total Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${result.stats.total_admins}</div>
+                            <div>Total Admins</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${result.stats.total_mahasiswa}</div>
+                            <div>Mahasiswa</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${result.stats.total_tenaga_pendidik}</div>
+                            <div>Tenaga Pendidik</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${result.stats.recent_users}</div>
+                            <div>Recent Users (7 days)</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showMessage('Error loading stats: ' + error.message, 'error');
+            }
+        }
+
+        async function loadUsers() {
+            const search = document.getElementById('searchInput').value;
+            const role = document.getElementById('roleFilter').value;
+            
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    ...(search && { search }),
+                    ...(role && { role })
+                });
+
+                const response = await fetch(`${API_BASE}/admin/users?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayUsers(result.users);
+                } else {
+                    showMessage(result.error || 'Failed to load users', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error: ' + error.message, 'error');
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>${user.programStudy || '-'}</td>
+                    <td>${user.is_admin ? 'Yes' : 'No'}</td>
+                    <td>
+                        <button class="btn ${user.is_admin ? 'btn-danger' : 'btn-success'}" 
+                                onclick="toggleAdmin(${user.id})">
+                            ${user.is_admin ? 'Remove Admin' : 'Make Admin'}
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteUser(${user.id})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function toggleAdmin(userId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/users/${userId}/toggle-admin`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message, 'success');
+                    loadUsers();
+                    loadStats();
+                } else {
+                    showMessage(result.error || 'Failed to toggle admin status', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message, 'success');
+                    loadUsers();
+                    loadStats();
+                } else {
+                    showMessage(result.error || 'Failed to delete user', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error: ' + error.message, 'error');
+            }
+        }
+
+        function searchUsers() {
+            loadUsers();
+        }
+
+        function filterUsers() {
+            loadUsers();
+        }
+    </script>
+</body>
+</html>
