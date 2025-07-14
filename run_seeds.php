@@ -13,7 +13,7 @@ $seeders = [
     'Database\Seeders\UsersSeeder',
     'Database\Seeders\ProgramStudiSeeder',
     'Database\Seeders\FeedbackSeeder',
-    'Database\Seeders\LaporanSeeder'
+    // 'Database\Seeders\LaporanSeeder'
 ];
 
 echo "Running seeders...\n";

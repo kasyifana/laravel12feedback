@@ -16,18 +16,20 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/register-admin', [AuthController::class, 'registerAdmin']); // For first admin only
 
+// Public Feedback Routes (accessible without login)
+Route::get('/feedback', [FeedbackController::class, 'index']);
+Route::get('/feedback/stats', [FeedbackController::class, 'getStats']);
+Route::get('/feedback/{id}', [FeedbackController::class, 'show']);
+
+
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::get('/check-admin', [AuthController::class, 'checkAdmin']);
-    
-    // Feedback Routes - Public access for reading
-    Route::get('/feedback', [FeedbackController::class, 'index']);
-    Route::get('/feedback/stats', [FeedbackController::class, 'getStats']);
-    Route::get('/feedback/{id}', [FeedbackController::class, 'show']);
-    Route::post('/feedback', [FeedbackController::class, 'store']); // Can be anonymous
 
-    // User Feedback Routes
+    Route::post('/feedback', [FeedbackController::class, 'store']); // Can be anonymous
+    
+    // User Feedback Routes (require authentication)
     Route::get('/feedback/my', [FeedbackController::class, 'myFeedback']);
     Route::put('/feedback/{id}', [FeedbackController::class, 'update']);
     Route::delete('/feedback/{id}', [FeedbackController::class, 'destroy']);
