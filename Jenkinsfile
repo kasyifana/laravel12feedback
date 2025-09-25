@@ -1,28 +1,33 @@
 pipeline {
-    agent any // Menjalankan pipeline ini di agent/node Jenkins mana pun yang tersedia
+    // Jalankan pipeline ini di dalam container Docker yang memiliki Node.js v18
+    agent {
+        docker { image 'node:18-alpine' }
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                // Jenkins otomatis akan mengambil kode dari repo yang dikonfigurasi
+                // Perintah 'git checkout' akan otomatis dijalankan oleh Jenkins di awal
                 echo 'Mengambil kode dari GitHub...'
             }
         }
         stage('Build') {
             steps {
-                // Ganti perintah ini sesuai dengan teknologimu
-                // Contoh untuk proyek Node.js: sh 'npm install'
-                // Contoh untuk proyek Java (Maven): sh 'mvn package'
                 echo 'Tahap build sedang berjalan...'
-                sh 'node --version' // Contoh perintah sederhana
+                // Sekarang perintah 'node' dan 'npm' akan ditemukan
+                sh 'node --version'
+                sh 'npm --version'
+                // Kamu bisa tambahkan perintah build-mu di sini, contoh:
+                // sh 'npm install'
             }
         }
         stage('Test') {
             steps {
-                // Ganti perintah ini dengan perintah testing-mu
-                // Contoh untuk proyek Node.js: sh 'npm test'
                 echo 'Tahap testing sedang berjalan...'
+                // Contoh:
+                // sh 'npm test'
             }
         }
+        // Tahap Deploy belum kita sertakan lagi agar fokus memperbaiki build dulu
     }
 }
